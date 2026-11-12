@@ -1,0 +1,19 @@
+{
+  "name": "dataproduct-builder-dbt-redshift",
+  "owner": {
+    "name": "Entropy Data",
+    "email": "hello@entropy-data.com"
+  },
+  "metadata": {
+    "description": "Coding-agent plugins from Entropy Data.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "dataproduct-builder-dbt-redshift",
+      "description": "Build data products with dbt on Amazon Redshift and integrate them with Entropy Data.",
+      "version": "0.1.0",
+      "source": "."
+    }
+  ]
+}

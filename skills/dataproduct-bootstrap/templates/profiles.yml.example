@@ -1,0 +1,19 @@
+{{DBT_PROJECT_NAME}}:
+  target: dev
+  outputs:
+    dev:
+      type: redshift
+      method: database                          # database user + password
+      host: {{HOST}}                            # cluster or Redshift Serverless workgroup endpoint
+      port: 5439
+      dbname: {{DATABASE}}
+      schema: {{SCHEMA}}
+      user: {{REDSHIFT_USER}}
+      password: "{{ env_var('REDSHIFT_PASSWORD') }}"
+      sslmode: require
+      threads: 4
+      # IAM instead of a password (e.g. after `aws sso login`): AWS mints temporary database credentials.
+      # method: iam_role
+      # region: {{REGION}}
+      # iam_profile: <fill in: AWS profile name, or omit for the default credential chain>
+      # cluster_id: <fill in: provisioned cluster identifier; omit for Redshift Serverless>

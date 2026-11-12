@@ -1,0 +1,87 @@
+name: "{{DATA_PRODUCT_NAME}} Data Product"
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * *"
+
+env:
+  API: {{API_HOST}}/api
+
+permissions:
+  id-token: write   # GitHub OIDC token for aws-actions/configure-aws-credentials
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          # IAM role trusted for this repository's GitHub OIDC token, stored as a repository secret.
+          # dbt and datacontract test exchange it for temporary Redshift database credentials.
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: {{REGION}}
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Sync Python deps
+        # Installs the dbt adapter, openlineage-dbt, datacontract-cli[all],
+        # entropy-data (and other dev deps) into the project's .venv at the
+        # versions pinned by uv.lock. All `uv run …` invocations below use
+        # this venv.
+        run: uv sync
+
+      - name: Create profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<EOF
+          {{DBT_PROFILE}}:
+            target: prod
+            outputs:
+              prod:
+                type: redshift
+                method: iam_role
+                host: {{HOST}}
+                port: 5439
+                dbname: {{DATABASE}}
+                schema: {{SCHEMA}}
+                region: {{REGION}}
+                {{REDSHIFT_IDENTIFIER}}
+                sslmode: require
+                threads: 4
+          EOF
+
+      - name: dbt deps
+        run: uv run dbt deps
+
+      - name: dbt run
+        run: uv run dbt-ol run --target prod
+        env:
+          OPENLINEAGE__TRANSPORT__AUTH__APIKEY: ${{ secrets.ENTROPY_DATA_API_KEY }}
+
+      - name: dbt test
+        run: uv run dbt test --target prod
+
+      - name: Publish data product
+        run: uv run entropy-data dataproducts put {{DATA_PRODUCT_ID}} --file {{ODPS_FILE}}
+        env:
+          ENTROPY_DATA_API_KEY: ${{ secrets.ENTROPY_DATA_API_KEY }}
+
+      - name: Publish data contract
+        run: uv run entropy-data datacontracts put {{CONTRACT_ID}} --file models/output_ports/v1/{{CONTRACT_FILE}}
+        env:
+          ENTROPY_DATA_API_KEY: ${{ secrets.ENTROPY_DATA_API_KEY }}
+
+      - name: Data contract test
+        run: |
+          uv run datacontract test models/output_ports/v1/{{CONTRACT_FILE}} \
+            --server production \
+            --publish $API/test-results
+        env:
+          ENTROPY_DATA_API_KEY: ${{ secrets.ENTROPY_DATA_API_KEY }}
+          # No password set: datacontract test uses the assumed IAM role (temporary database credentials).
+          DATACONTRACT_REDSHIFT_REGION: {{REGION}}

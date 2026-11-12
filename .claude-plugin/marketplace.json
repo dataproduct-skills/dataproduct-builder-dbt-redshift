@@ -1,0 +1,38 @@
+{
+  "name": "dataproduct-builder-dbt-redshift",
+  "owner": {
+    "name": "Entropy Data",
+    "email": "hello@entropy-data.com"
+  },
+  "description": "Coding-agent plugins from Entropy Data.",
+  "plugins": [
+    {
+      "name": "dataproduct-builder-dbt-redshift",
+      "source": {
+        "source": "github",
+        "repo": "dataproduct-skills/dataproduct-builder-dbt-redshift"
+      },
+      "description": "Build data products with dbt on Amazon Redshift and integrate them with Entropy Data.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Entropy Data",
+        "url": "https://entropy-data.com"
+      },
+      "homepage": "https://github.com/dataproduct-skills/dataproduct-builder-dbt-redshift",
+      "repository": "https://github.com/dataproduct-skills/dataproduct-builder-dbt-redshift",
+      "license": "MIT",
+      "keywords": [
+        "dbt",
+        "redshift",
+        "aws",
+        "data-product",
+        "data-contract",
+        "entropy-data",
+        "odcs",
+        "odps",
+        "openlineage"
+      ],
+      "category": "Data"
+    }
+  ]
+}

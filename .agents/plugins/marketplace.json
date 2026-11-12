@@ -1,0 +1,21 @@
+{
+  "name": "dataproduct-builder-dbt-redshift",
+  "interface": {
+    "displayName": "Data Product Builder Plugins",
+    "shortDescription": "Coding-agent plugins from Entropy Data."
+  },
+  "plugins": [
+    {
+      "name": "dataproduct-builder-dbt-redshift",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/dataproduct-skills/dataproduct-builder-dbt-redshift.git"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Data"
+    }
+  ]
+}
